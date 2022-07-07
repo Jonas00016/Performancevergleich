@@ -125,6 +125,15 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.rendering.hybrid": {
+      "version": "0.51.0-preview.32",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.entities": "0.51.0-preview.32"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.roslyn": {
       "version": "0.2.2-preview",
       "depth": 1,
