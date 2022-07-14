@@ -242,6 +242,6 @@ MonoBehaviour:
   playerForce: 10
   bulletVelocity: 20
   numAsteroids: 200
-  levelWidth: 20
-  levelHeight: 20
-  levelDepth: 20
+  levelWidth: 40
+  levelHeight: 40
+  levelDepth: 40
