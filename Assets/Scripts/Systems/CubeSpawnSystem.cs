@@ -15,6 +15,7 @@ public partial class CubeSpawnSystem : SystemBase
 
     private float breakeTime = 1f;
     private float breakeUntill = 0f;
+    public static bool forceCubeIncrementation = false;
 
     protected override void OnCreate()
     {
@@ -25,16 +26,17 @@ public partial class CubeSpawnSystem : SystemBase
     [BurstCompile]
     protected override void OnUpdate()
     {
-        if (!Input.GetKey("space")) return;
-
+        if (!Input.GetKey("space") && !forceCubeIncrementation) return;
+        
         if (prefab == Entity.Null)
         {
             prefab = GetSingleton<CubeAuthoringComponent>().prfab;
             return;
         }
 
-        if (UnityEngine.Time.time < breakeUntill) return;
+        if (UnityEngine.Time.time < breakeUntill && !forceCubeIncrementation) return;
         breakeUntill = UnityEngine.Time.time + breakeTime;
+        forceCubeIncrementation = false;
 
         EntityCommandBuffer commandBuffer = beginSumilationECB.CreateCommandBuffer();
         Entity cubePrefab = prefab;
@@ -43,11 +45,11 @@ public partial class CubeSpawnSystem : SystemBase
 
         Job.WithCode(() =>
         {
-            for (int x = 0; x < 10; x++)
+            for (int x = 0; x < 100; x++)
             {
-                for (int z = 0; z < 10; z++)
+                for (int z = 0; z < 100; z++)
                 {
-                    Translation spawnPosition = new Translation { Value = new float3(x, numCubes / 100, z) * spacing };
+                    Translation spawnPosition = new Translation { Value = new float3(x, numCubes / 10000, z) * spacing };
                     Entity newCubeEntity = commandBuffer.Instantiate(cubePrefab);
                     commandBuffer.SetComponent(newCubeEntity, spawnPosition);
                 }
