@@ -11,7 +11,8 @@ public partial class CubeRotationSystem : SystemBase
     {
         float deltaTime = Time.DeltaTime;
 
-        Entities.WithAll<CubeTag>().ForEach((ref Rotation rotation) => {
+        Entities.WithAll<CubeTag>().ForEach((ref Rotation rotation) =>
+        {
             rotation.Value = math.mul(rotation.Value, quaternion.RotateX(deltaTime));
             rotation.Value = math.mul(rotation.Value, quaternion.RotateY(deltaTime));
             rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(deltaTime));
