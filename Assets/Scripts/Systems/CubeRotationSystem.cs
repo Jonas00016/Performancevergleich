@@ -1,4 +1,4 @@
-using Unity.Burst;
+/*using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -19,3 +19,4 @@ public partial class CubeRotationSystem : SystemBase
         }).ScheduleParallel();
     }
 }
+*/

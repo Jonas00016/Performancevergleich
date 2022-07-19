@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
@@ -43,15 +44,24 @@ public partial class CubeSpawnSystem : SystemBase
         float spacing = spacingAmount;
         int numCubes = cubeQuery.CalculateEntityCountWithoutFiltering();
 
+        Unity.Mathematics.Random rand = new Unity.Mathematics.Random((uint)Stopwatch.GetTimestamp());
+
         Job.WithCode(() =>
         {
-            for (int x = 0; x < 100; x++)
+            for (int x = 0; x < 10; x++)
             {
-                for (int z = 0; z < 100; z++)
+                for (int z = 0; z < 10; z++)
                 {
-                    Translation spawnPosition = new Translation { Value = new float3(x, numCubes / 10000, z) * spacing };
                     Entity newCubeEntity = commandBuffer.Instantiate(cubePrefab);
+
+                    Translation spawnPosition = new Translation { Value = new float3(x, 100, z) * spacing };
                     commandBuffer.SetComponent(newCubeEntity, spawnPosition);
+
+                    quaternion rotation = quaternion.RotateX(rand.NextFloat(-1f, 1f));
+                    rotation = math.mul(rotation, quaternion.RotateY(rand.NextFloat(-1f, 1f)));
+                    rotation = math.mul(rotation, quaternion.RotateZ(rand.NextFloat(-1f, 1f)));
+                    Rotation spawnRotation = new Rotation { Value = rotation };
+                    commandBuffer.SetComponent(newCubeEntity, spawnRotation);
                 }
                 
             }
