@@ -54,7 +54,7 @@ public partial class CubeSpawnSystem : SystemBase
                 {
                     Entity newCubeEntity = commandBuffer.Instantiate(cubePrefab);
 
-                    Translation spawnPosition = new Translation { Value = new float3(x, 100, z) * spacing };
+                    Translation spawnPosition = new Translation { Value = new float3(x, 50, z) * spacing };
                     commandBuffer.SetComponent(newCubeEntity, spawnPosition);
 
                     quaternion rotation = quaternion.RotateX(rand.NextFloat(-1f, 1f));
