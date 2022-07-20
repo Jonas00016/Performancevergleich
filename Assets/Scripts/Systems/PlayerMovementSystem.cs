@@ -23,8 +23,8 @@ public partial class PlayerMovementSystem : SystemBase
         float deltaTime = Time.DeltaTime;
         float speed = MOVEMENTSPEED;
 
-        Entities.WithAll<PlayerTag>().ForEach((ref Translation translation) => {
-            translation.Value = translation.Value + math.normalize(vertical + horizontal) * speed * deltaTime;
+        Entities.WithAll<PlayerTag>().ForEach((ref Translation translation, in Rotation rotation) => {
+            translation.Value += math.mul(rotation.Value, math.normalize(vertical + horizontal) * speed * deltaTime);
         }).Schedule();
     }
 }
