@@ -5,6 +5,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using Unity.Physics;
 
 public partial class PlayerRotateSystem : SystemBase
 {
@@ -14,7 +15,7 @@ public partial class PlayerRotateSystem : SystemBase
         float rotationOffset = ROTATIONSPEED * -Input.GetAxis("Mouse X");
 
         if (rotationOffset == 0f) return;
-        
+
         Entities.WithAll<PlayerTag>().ForEach((ref Rotation rotation) => {
             rotation.Value = math.mul(rotation.Value, quaternion.EulerXYZ(0f, -rotationOffset, 0f));
         }).Schedule();

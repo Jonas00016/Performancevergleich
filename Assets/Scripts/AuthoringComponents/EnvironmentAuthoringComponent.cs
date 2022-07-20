@@ -1,7 +1,7 @@
 using Unity.Entities;
 
 [GenerateAuthoringComponent]
-public struct FloorAuthoringComponent : IComponentData
+public struct EnvironmentAuthoringComponent : IComponentData
 {
     public Entity prefab;
 }

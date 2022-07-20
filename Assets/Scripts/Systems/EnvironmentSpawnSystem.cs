@@ -5,15 +5,15 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
-public partial class FloorSpawnSystem : SystemBase
+public partial class EnvironmentSpawnSystem : SystemBase
 {
-    private EntityQuery floorQuery;
+    private EntityQuery environmentQuery;
     private BeginSimulationEntityCommandBufferSystem beginnSimulationECB;
     private Entity prefab;
 
     protected override void OnCreate()
     {
-        floorQuery = GetEntityQuery(ComponentType.ReadWrite<FloorTag>());
+        environmentQuery = GetEntityQuery(ComponentType.ReadWrite<EnvironmentTag>());
         beginnSimulationECB = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
     }
 
@@ -21,20 +21,20 @@ public partial class FloorSpawnSystem : SystemBase
     {
         if (prefab == Entity.Null)
         {
-            prefab = GetSingleton<FloorAuthoringComponent>().prefab;
+            prefab = GetSingleton<EnvironmentAuthoringComponent>().prefab;
             return;
         }
 
-        int floorCount = floorQuery.CalculateEntityCountWithoutFiltering();
+        int environmentCount = environmentQuery.CalculateEntityCountWithoutFiltering();
 
-        if (floorCount >= 1) return;
+        if (environmentCount >= 1) return;
 
         EntityCommandBuffer commandBuffer = beginnSimulationECB.CreateCommandBuffer();
-        Entity floorPrefab = prefab;
+        Entity environmentPrefab = prefab;
         
         Job.WithCode(() =>
         {
-            commandBuffer.Instantiate(floorPrefab);
+            commandBuffer.Instantiate(environmentPrefab);
         }).Schedule();
 
         beginnSimulationECB.AddJobHandleForProducer(Dependency);
