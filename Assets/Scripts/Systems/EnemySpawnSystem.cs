@@ -52,22 +52,17 @@ public partial class EnemySpawnSystem : SystemBase
             {
                 Entity newEnemyEntity = commandBuffer.Instantiate(enemyPrefab);
 
-                float3 position = new float3(
-                            rnd.NextFloat(-50f, 50f),
-                            0f,
-                            rnd.NextFloat(50f, 10f)
-                        );
+                float3 position = float3.zero;
 
-                if (i < MAX_ENEMIES / 4 * 1)
+                if (i < spawnAmount / 4 * 1)
                 {
                     position = new float3(
                             rnd.NextFloat(-50f, -10f),
                             0f,
                             rnd.NextFloat(-50f, 50f)
                         );
-                }
-
-                if (i < MAX_ENEMIES / 4 * 2)
+                } 
+                else if (i < spawnAmount / 4 * 2)
                 {
                     position = new float3(
                             rnd.NextFloat(-50f, 50f),
@@ -75,8 +70,7 @@ public partial class EnemySpawnSystem : SystemBase
                             rnd.NextFloat(-50f, -10f)
                         );
                 }
-
-                if (i < MAX_ENEMIES / 4 * 3)
+                else if (i < spawnAmount / 4 * 3)
                 {
                     position = new float3(
                             rnd.NextFloat(50f, 10f),
@@ -84,6 +78,16 @@ public partial class EnemySpawnSystem : SystemBase
                             rnd.NextFloat(-50f, 50f)
                         );
                 }
+                else
+                {
+                    position = new float3(
+                            rnd.NextFloat(-50f, 50f),
+                            0f,
+                            rnd.NextFloat(50f, 10f)
+                        );
+                }
+
+
 
                 Translation spawnPosition = new Translation { Value = position };
 
