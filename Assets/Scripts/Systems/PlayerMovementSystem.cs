@@ -7,11 +7,14 @@ using Unity.Physics;
 using Unity.Transforms;
 using UnityEngine;
 
+[UpdateAfter(typeof(PlayerRotateSystem))]
 public partial class PlayerMovementSystem : SystemBase
 {
     private float3 FORWARD = new float3(0f, 0f, 1f);
     private float3 SIDEWAYS = new float3(1f, 0f, 0f);
     private const float MOVEMENTSPEED = 500;
+
+    public JobHandle movementHandle { get; private set; }
 
     [BurstCompile]
     protected override void OnUpdate()
@@ -22,8 +25,10 @@ public partial class PlayerMovementSystem : SystemBase
         float deltaTime = Time.DeltaTime;
         float speed = MOVEMENTSPEED;
 
-        Entities.WithAll<PlayerTag>().ForEach((ref PhysicsVelocity velocity, in Rotation rotation) => {
+        movementHandle = Entities.WithAll<PlayerTag>().ForEach((ref PhysicsVelocity velocity, in Rotation rotation) => {
             velocity.Linear = math.mul(rotation.Value, math.normalizesafe(vertical + horizontal, 0f) * speed * deltaTime);
-        }).Schedule();
+        }).Schedule(Dependency);
+
+        Dependency = JobHandle.CombineDependencies(Dependency, movementHandle);
     }
 }

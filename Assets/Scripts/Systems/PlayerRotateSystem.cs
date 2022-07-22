@@ -10,14 +10,18 @@ using Unity.Physics;
 public partial class PlayerRotateSystem : SystemBase
 {
     private const float ROTATIONSPEED = 0.04f;
+
+    public JobHandle rotationHandle { get; private set; }
     protected override void OnUpdate()
     {
         float rotationOffset = ROTATIONSPEED * -Input.GetAxis("Mouse X");
 
         if (rotationOffset == 0f) return;
 
-        Entities.WithAll<PlayerTag>().ForEach((ref Rotation rotation) => {
+        rotationHandle = Entities.WithAll<PlayerTag>().ForEach((ref Rotation rotation) => {
             rotation.Value = math.mul(rotation.Value, quaternion.EulerXYZ(0f, -rotationOffset, 0f));
-        }).Schedule();
+        }).Schedule(Dependency);
+
+        Dependency = JobHandle.CombineDependencies(Dependency, rotationHandle);
     }
 }
