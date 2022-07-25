@@ -8,7 +8,7 @@ using Unity.Physics;
 
 public partial class EnemyMovementSystem : SystemBase
 {
-    private const float MOVEMENTSPEED = 300f;
+    private const float MOVEMENTSPEED = 100f;
 
     private EntityQuery enemyQuery;
     private EntityQuery playerQuery;

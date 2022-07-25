@@ -9,11 +9,38 @@ using UnityEngine;
 using Unity.Physics.Systems;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup))]
+[UpdateAfter(typeof(StepPhysicsWorld))]
+[UpdateAfter(typeof(ExportPhysicsWorld))]
+[UpdateBefore(typeof(EndFramePhysicsSystem))]
 public partial class PlayerEnemyCollisionSystem : SystemBase
 {
+    [BurstCompile]
+    public struct CollisionJob : ICollisionEventsJob
+    {
+        public ComponentDataFromEntity<PlayerTag> players;
+        public ComponentDataFromEntity<EnemyTag> enemies;
+        public EntityCommandBuffer ecb;
+
+        public void Execute(CollisionEvent collisionEvent)
+        {
+            if (
+                players.HasComponent(collisionEvent.EntityA) &&
+                enemies.HasComponent(collisionEvent.EntityB) ||
+                players.HasComponent(collisionEvent.EntityB) &&
+                enemies.HasComponent(collisionEvent.EntityA)
+                )
+            {
+                ecb.AddComponent(collisionEvent.EntityA, new GameOverTag { });
+            }
+        }
+    }
     private StepPhysicsWorld stepPhysicsWorld;
-    private BuildPhysicsWorld buildPhysicsWorld;
     private EndFixedStepSimulationEntityCommandBufferSystem endFixedStepSimulationECB;
+
+    protected override void OnStartRunning()
+    {
+        this.RegisterPhysicsRuntimeSystemReadWrite();
+    }
 
     protected override void OnCreate()
     {
@@ -21,7 +48,6 @@ public partial class PlayerEnemyCollisionSystem : SystemBase
         RequireSingletonForUpdate<EnemyTag>();
 
         stepPhysicsWorld = World.GetOrCreateSystem<StepPhysicsWorld>();
-        buildPhysicsWorld = World.GetOrCreateSystem<BuildPhysicsWorld>();
         endFixedStepSimulationECB = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
     }
 
@@ -31,26 +57,11 @@ public partial class PlayerEnemyCollisionSystem : SystemBase
 
         JobHandle collisionEventHandle = new CollisionJob
         {
-           /* players = GetComponentDataFromEntity<PlayerTag>(),
+            players = GetComponentDataFromEntity<PlayerTag>(),
             enemies = GetComponentDataFromEntity<EnemyTag>(),
-            ecb = commandBuffer*/
+            ecb = commandBuffer
         }.Schedule(stepPhysicsWorld.Simulation, Dependency);
 
-        collisionEventHandle.Complete();
-
-        endFixedStepSimulationECB.AddJobHandleForProducer(Dependency);
-    }
-}
-
-public struct CollisionJob : ICollisionEventsJob
-{
-    /*public ComponentDataFromEntity<PlayerTag> players;
-    public ComponentDataFromEntity<EnemyTag> enemies;
-    public EntityCommandBuffer ecb;*/
-
-    public void Execute(CollisionEvent collisionEvent)
-    {
-        Debug.Log("A: " + collisionEvent.EntityA);
-        Debug.Log("B: " + collisionEvent.EntityB);
+        endFixedStepSimulationECB.AddJobHandleForProducer(collisionEventHandle);
     }
 }
