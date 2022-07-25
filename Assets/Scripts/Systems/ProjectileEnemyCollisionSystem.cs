@@ -12,27 +12,27 @@ using Unity.Physics.Systems;
 [UpdateAfter(typeof(StepPhysicsWorld))]
 [UpdateAfter(typeof(ExportPhysicsWorld))]
 [UpdateBefore(typeof(EndFramePhysicsSystem))]
-public partial class PlayerEnemyCollisionSystem : SystemBase
+[UpdateAfter(typeof(PlayerEnemyCollisionSystem))]
+public partial class ProjectileEnemyCollisionSystem : SystemBase
 {
-    public JobHandle collisionEventHandle { get; private set; }
-
     [BurstCompile]
     public struct CollisionJob : ICollisionEventsJob
     {
-        public ComponentDataFromEntity<PlayerTag> players;
+        public ComponentDataFromEntity<ProjectileTag> projectiles;
         public ComponentDataFromEntity<EnemyTag> enemies;
         public EntityCommandBuffer ecb;
 
         public void Execute(CollisionEvent collisionEvent)
         {
             if (
-                players.HasComponent(collisionEvent.EntityA) &&
+                projectiles.HasComponent(collisionEvent.EntityA) &&
                 enemies.HasComponent(collisionEvent.EntityB) ||
-                players.HasComponent(collisionEvent.EntityB) &&
+                projectiles.HasComponent(collisionEvent.EntityB) &&
                 enemies.HasComponent(collisionEvent.EntityA)
                 )
             {
-                ecb.AddComponent(collisionEvent.EntityA, new GameOverTag { });
+                ecb.AddComponent(collisionEvent.EntityA, new DestroyTag { });
+                ecb.AddComponent(collisionEvent.EntityB, new DestroyTag { });
             }
         }
     }
@@ -55,17 +55,19 @@ public partial class PlayerEnemyCollisionSystem : SystemBase
 
     protected override void OnUpdate()
     {
+        JobHandle playerEnemyCollisionHandle = World.GetOrCreateSystem<PlayerEnemyCollisionSystem>().collisionEventHandle;
+
+        Dependency = JobHandle.CombineDependencies(Dependency, playerEnemyCollisionHandle);
+
         EntityCommandBuffer commandBuffer = endFixedStepSimulationECB.CreateCommandBuffer();
 
-        collisionEventHandle = new CollisionJob
+        JobHandle collisionEventHandle = new CollisionJob
         {
-            players = GetComponentDataFromEntity<PlayerTag>(),
+            projectiles = GetComponentDataFromEntity<ProjectileTag>(),
             enemies = GetComponentDataFromEntity<EnemyTag>(),
             ecb = commandBuffer
         }.Schedule(stepPhysicsWorld.Simulation, Dependency);
 
-        Dependency = JobHandle.CombineDependencies(Dependency, collisionEventHandle);
-
-        endFixedStepSimulationECB.AddJobHandleForProducer(Dependency);
+        endFixedStepSimulationECB.AddJobHandleForProducer(collisionEventHandle);
     }
 }

@@ -44,7 +44,7 @@ public partial class ProjectileSpawnSystem : SystemBase
             {
                 Entity projectileEntity = commandBuffer.Instantiate(entityInQueryIndex, projectilePrefab);
 
-                Translation spawnPosition = new Translation { Value = math.mul(rotation.Value, translation.Value) };
+                Translation spawnPosition = new Translation { Value = translation.Value + math.mul(rotation.Value, float3.zero) };
                 commandBuffer.SetComponent(entityInQueryIndex, projectileEntity, spawnPosition);
 
                 PhysicsVelocity spawnVelocity = new PhysicsVelocity { Linear = (movementSpeed * math.mul(rotation.Value, new float3(0, 0, 1)).xyz) + velocity.Linear };

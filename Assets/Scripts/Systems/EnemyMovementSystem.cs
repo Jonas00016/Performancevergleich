@@ -40,6 +40,7 @@ public partial class EnemyMovementSystem : SystemBase
         float movementSpeed = MOVEMENTSPEED;
 
         var moveEnemyHandler = Entities
+            .WithAll<EnemyTag>()
             .WithReadOnly(playerTranslation)
             .WithDisposeOnCompletion(playerTranslation)
             .ForEach((ref PhysicsVelocity velocity, in Translation translation, in Rotation rotation) =>

@@ -4,35 +4,33 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
 
 [UpdateInGroup(typeof(LateSimulationSystemGroup))]
 [UpdateBefore(typeof(DestroySystem))]
-public partial class GameOverSystem : SystemBase
+public partial class ProjectileDisappearSystem : SystemBase
 {
-    private EntityQuery gameOverQuery;
     private EndSimulationEntityCommandBufferSystem endSimulationECB;
 
     protected override void OnCreate()
     {
-        gameOverQuery = GetEntityQuery(ComponentType.ReadOnly<GameOverTag>());
         endSimulationECB = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     protected override void OnUpdate()
     {
-        bool gameOver = gameOverQuery.CalculateEntityCountWithoutFiltering() > 0;
-        if (!gameOver) return;
-
-        World.GetOrCreateSystem<PlayerSpawnSystem>().Enabled = false;
-        World.GetOrCreateSystem<EnemySpawnSystem>().Enabled = false;
         EntityCommandBuffer.ParallelWriter commandBuffer = endSimulationECB.CreateCommandBuffer().AsParallelWriter();
+        float deltaTime = Time.DeltaTime;
 
         Entities
-            .WithAny<PlayerTag, EnemyTag, ProjectileTag>()
-            .ForEach((Entity e, int entityInQueryIndex) => 
+            .WithAll<ProjectileTag>()
+            .ForEach((Entity e, int entityInQueryIndex, ref ProjectileLifetime projectileLifetime) =>
             {
-                commandBuffer.AddComponent(entityInQueryIndex, e, new DestroyTag { });
+                projectileLifetime.lifetime += deltaTime;
+
+                if (projectileLifetime.lifetime >= projectileLifetime.maxLifetime)
+                {
+                    commandBuffer.AddComponent(entityInQueryIndex, e, new DestroyTag { });
+                }
             }
         ).ScheduleParallel();
 
