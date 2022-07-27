@@ -19,6 +19,7 @@ public partial class GameOverSystem : SystemBase
         endSimulationECB = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         bool gameOver = gameOverQuery.CalculateEntityCountWithoutFiltering() > 0;

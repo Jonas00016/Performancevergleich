@@ -53,6 +53,7 @@ public partial class PlayerEnemyCollisionSystem : SystemBase
         endFixedStepSimulationECB = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         EntityCommandBuffer commandBuffer = endFixedStepSimulationECB.CreateCommandBuffer();

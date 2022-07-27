@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: PhysicsCategoryNames
   m_EditorClassIdentifier: 
   m_CategoryNames:
-  - Environmant
+  - Floor
   - Player
   - Enemy
   - Projectile
-  - 
+  - Wall
   - 
   - 
   - 

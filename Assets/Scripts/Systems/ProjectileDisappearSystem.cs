@@ -16,6 +16,7 @@ public partial class ProjectileDisappearSystem : SystemBase
         endSimulationECB = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         EntityCommandBuffer.ParallelWriter commandBuffer = endSimulationECB.CreateCommandBuffer().AsParallelWriter();

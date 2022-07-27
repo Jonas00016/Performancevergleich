@@ -17,6 +17,7 @@ public partial class EnvironmentSpawnSystem : SystemBase
         beginnSimulationECB = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         if (prefab == Entity.Null)

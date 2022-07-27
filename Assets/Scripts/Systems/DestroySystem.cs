@@ -16,6 +16,7 @@ public partial class DestroySystem : SystemBase
         RequireSingletonForUpdate<DestroyTag>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         EntityCommandBuffer.ParallelWriter commandBuffer = endSimulationECB.CreateCommandBuffer().AsParallelWriter();

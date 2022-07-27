@@ -32,7 +32,7 @@ public partial class ProjectileSpawnSystem : SystemBase
         }
 
         if (!Input.GetKey("space") || UnityEngine.Time.time < nextTime) return;
-        nextTime +=  1f / perSecond;
+        nextTime = Time.DeltaTime + 1f / perSecond;
 
         EntityCommandBuffer.ParallelWriter commandBuffer = beginSimulationECB.CreateCommandBuffer().AsParallelWriter();
         Entity projectilePrefab = prefab;

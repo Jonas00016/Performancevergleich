@@ -53,6 +53,7 @@ public partial class ProjectileEnemyCollisionSystem : SystemBase
         endFixedStepSimulationECB = World.GetOrCreateSystem<EndFixedStepSimulationEntityCommandBufferSystem>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         JobHandle playerEnemyCollisionHandle = World.GetOrCreateSystem<PlayerEnemyCollisionSystem>().collisionEventHandle;

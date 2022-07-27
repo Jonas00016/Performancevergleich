@@ -19,6 +19,7 @@ public partial class EnemyMovementSystem : SystemBase
         playerQuery = GetEntityQuery(ComponentType.ReadOnly<PlayerTag>(), ComponentType.ReadOnly<Translation>());
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         int enemyCount = enemyQuery.CalculateEntityCountWithoutFiltering();

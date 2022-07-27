@@ -25,6 +25,7 @@ public partial class EnemySpawnSystem : SystemBase
         beginSimulationECB = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
     }
 
+    [BurstCompile]
     protected override void OnUpdate()
     {
         if (prefab == Entity.Null)
@@ -86,8 +87,6 @@ public partial class EnemySpawnSystem : SystemBase
                             rnd.NextFloat(50f, 10f)
                         );
                 }
-
-
 
                 Translation spawnPosition = new Translation { Value = position };
 
