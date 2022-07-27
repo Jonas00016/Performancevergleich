@@ -9,7 +9,7 @@ using Unity.Physics;
 
 public partial class ProjectileSpawnSystem : SystemBase
 {
-    private const float MOVEMENTSPEED = 100f;
+    private const float MOVEMENTSPEED = 50f;
 
     private BeginSimulationEntityCommandBufferSystem beginSimulationECB;
     private Entity prefab;
@@ -32,11 +32,12 @@ public partial class ProjectileSpawnSystem : SystemBase
         }
 
         if (!Input.GetKey("space") || UnityEngine.Time.time < nextTime) return;
-        nextTime = Time.DeltaTime + 1f / perSecond;
+        nextTime = UnityEngine.Time.time + 1f / perSecond;
 
         EntityCommandBuffer.ParallelWriter commandBuffer = beginSimulationECB.CreateCommandBuffer().AsParallelWriter();
         Entity projectilePrefab = prefab;
         float movementSpeed = MOVEMENTSPEED;
+        float deltaTime = Time.DeltaTime;
 
         Entities
             .WithAll<PlayerTag>()
@@ -47,7 +48,7 @@ public partial class ProjectileSpawnSystem : SystemBase
                 Translation spawnPosition = new Translation { Value = translation.Value + math.mul(rotation.Value, float3.zero) };
                 commandBuffer.SetComponent(entityInQueryIndex, projectileEntity, spawnPosition);
 
-                PhysicsVelocity spawnVelocity = new PhysicsVelocity { Linear = (movementSpeed * math.mul(rotation.Value, new float3(0, 0, 1)).xyz) + velocity.Linear };
+                PhysicsVelocity spawnVelocity = new PhysicsVelocity { Linear = (movementSpeed * math.mul(rotation.Value, new float3(0, 0, 1)).xyz) + velocity.Linear * deltaTime };
                 commandBuffer.AddComponent(entityInQueryIndex, projectileEntity, spawnVelocity);
             }
         ).ScheduleParallel();
