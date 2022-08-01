@@ -8,16 +8,18 @@ using UnityEngine;
 
 public partial class CubeSpawnSystem : SystemBase
 {
+    private const int AXIS_LENGTH = 50;
+
     private EntityQuery cubeQuery;
     private BeginSimulationEntityCommandBufferSystem beginSumilationECB;
     private Entity prefab;
     private float spacingAmount = 1.5f;
 
-    private float breakeTime = 1f;
-    private float breakeUntill = 0f;
+    public int spawnAmount;
 
     protected override void OnCreate()
     {
+        spawnAmount = AXIS_LENGTH * AXIS_LENGTH;
         cubeQuery = GetEntityQuery(ComponentType.ReadWrite<CubeTag>());
         beginSumilationECB = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
     }
@@ -25,35 +27,38 @@ public partial class CubeSpawnSystem : SystemBase
     [BurstCompile]
     protected override void OnUpdate()
     {
-        if (!Input.GetKey("space")) return;
-
         if (prefab == Entity.Null)
         {
             prefab = GetSingleton<CubeAuthoringComponent>().prfab;
             return;
         }
+    }
 
-        if (UnityEngine.Time.time < breakeUntill) return;
-        breakeUntill = UnityEngine.Time.time + breakeTime;
+    [BurstCompile]
+    public void SpawnNextWave()
+    {
+        if (prefab == Entity.Null) return;
 
         EntityCommandBuffer commandBuffer = beginSumilationECB.CreateCommandBuffer();
         Entity cubePrefab = prefab;
         float spacing = spacingAmount;
         int numCubes = cubeQuery.CalculateEntityCountWithoutFiltering();
+        int axisLength = AXIS_LENGTH;
+        int nextSpawnAmount = spawnAmount;
 
         Job.WithCode(() =>
         {
-            for (int x = 0; x < 10; x++)
+            for (int x = 0; x < axisLength; x++)
             {
-                for (int z = 0; z < 10; z++)
+                for (int z = 0; z < axisLength; z++)
                 {
-                    Translation spawnPosition = new Translation { Value = new float3(x, numCubes / 100, z) * spacing };
+                    Translation spawnPosition = new Translation { Value = new float3(x, numCubes / nextSpawnAmount, z) * spacing };
                     Entity newCubeEntity = commandBuffer.Instantiate(cubePrefab);
                     commandBuffer.SetComponent(newCubeEntity, spawnPosition);
                 }
-                
+
             }
-            
+
         }).Schedule();
 
         beginSumilationECB.AddJobHandleForProducer(Dependency);
