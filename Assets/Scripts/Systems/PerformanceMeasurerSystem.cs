@@ -19,13 +19,9 @@ public partial class PerformanceMeasurerSystem : SystemBase
     private int fps;
     private int sumFps = 0;
     private int fpsMeasured = 0;
-    private int minFps = int.MaxValue;
-    private int maxFps = int.MinValue;
 
-    private int incrementations = 0;
-    private float nextIncrementation = 6f;
-    private float breakeTime = 5f;
     private int spawnAmount = -1;
+    private string tempFPSCalculations = "";
 
     private EntityQuery cubeQuery;
 
@@ -39,8 +35,6 @@ public partial class PerformanceMeasurerSystem : SystemBase
 #endif
 
         cubeQuery = GetEntityQuery(ComponentType.ReadOnly<CubeTag>());
-
-        spawnAmount = World.GetOrCreateSystem<CubeSpawnSystem>().spawnAmount;
     }
 
     protected override void OnUpdate()
@@ -49,11 +43,7 @@ public partial class PerformanceMeasurerSystem : SystemBase
 
         CalculateFPS();
 
-        if (UnityEngine.Time.time < nextIncrementation) return;
-
         SaveCalculations();
-
-        IncreaseCubes();
     }
 
     private void CalculateFPS()
@@ -62,12 +52,7 @@ public partial class PerformanceMeasurerSystem : SystemBase
         fpsMeasured++;
         sumFps += fps;
 
-        if (fps > maxFps)
-        {
-            maxFps = fps;
-            return;
-        }
-        if (fps < minFps) minFps = fps;
+        spawnAmount = World.GetOrCreateSystem<CubeSpawnSystem>().SpawnNextWave();
     }
 
     private void SaveCalculations()
@@ -75,7 +60,7 @@ public partial class PerformanceMeasurerSystem : SystemBase
 #if UNITY_EDITOR
         if (!File.Exists(performanceReportPath))
         {
-            File.WriteAllText(performanceReportPath, "MIN_FPS, AVG_FPS, MAX_FPS, CUBES,");
+            File.WriteAllText(performanceReportPath, "FPS, CUBES,");
         }
 #else
         string directory = performanceReportPath.Substring(0, performanceReportPath.LastIndexOf("/"));
@@ -85,16 +70,18 @@ public partial class PerformanceMeasurerSystem : SystemBase
         }
 #endif
 
-        int avgFps = (fpsMeasured == 0 ? 0 : sumFps / fpsMeasured);
+        tempFPSCalculations += $"\n{fps}, {spawnAmount}";
 
-        File.AppendAllText(performanceReportPath, $"\n{minFps}, {avgFps}, {maxFps}, {spawnAmount * incrementations},");
+        if (spawnAmount % 100 != 0) return;
 
-        CheckForEnd(avgFps);
+        File.AppendAllText(performanceReportPath, tempFPSCalculations);
+
+        tempFPSCalculations = "";
+
+        CheckForEnd(sumFps / fpsMeasured);
 
         sumFps = 0;
         fpsMeasured = 0;
-        minFps = int.MaxValue;
-        maxFps = int.MinValue;
     }
 
     private void CheckForEnd(int avgFps)
@@ -107,14 +94,5 @@ public partial class PerformanceMeasurerSystem : SystemBase
 #else
         Application.Quit();
 #endif
-    }
-
-    private void IncreaseCubes()
-    {
-        nextIncrementation = UnityEngine.Time.time + breakeTime;
-
-        incrementations++;
-
-        World.GetOrCreateSystem<CubeSpawnSystem>().SpawnNextWave();
     }
 }

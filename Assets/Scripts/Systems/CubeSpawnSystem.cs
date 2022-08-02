@@ -5,21 +5,22 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
+using Unity.Physics;
 
 public partial class CubeSpawnSystem : SystemBase
 {
-    private const int AXIS_LENGTH = 50;
+    private const float UPSWING = 15f;
+
+    private float3 spawnPosition = new float3(50f, 20f, 50f);
 
     private EntityQuery cubeQuery;
     private BeginSimulationEntityCommandBufferSystem beginSumilationECB;
     private Entity prefab;
-    private float spacingAmount = 1.5f;
 
-    public int spawnAmount;
+    public int cubesSpawned = 0;
 
     protected override void OnCreate()
     {
-        spawnAmount = AXIS_LENGTH * AXIS_LENGTH;
         cubeQuery = GetEntityQuery(ComponentType.ReadWrite<CubeTag>());
         beginSumilationECB = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
     }
@@ -35,32 +36,32 @@ public partial class CubeSpawnSystem : SystemBase
     }
 
     [BurstCompile]
-    public void SpawnNextWave()
+    public int SpawnNextWave()
     {
-        if (prefab == Entity.Null) return;
+        if (prefab == Entity.Null) return -1;
 
         EntityCommandBuffer commandBuffer = beginSumilationECB.CreateCommandBuffer();
         Entity cubePrefab = prefab;
-        float spacing = spacingAmount;
         int numCubes = cubeQuery.CalculateEntityCountWithoutFiltering();
-        int axisLength = AXIS_LENGTH;
-        int nextSpawnAmount = spawnAmount;
+        float3 newSpawnPosition = spawnPosition;
+        float3 upwards = new float3(0f, 1f, 0f);
+        float upswing = UPSWING;
 
-        Job.WithCode(() =>
-        {
-            for (int x = 0; x < axisLength; x++)
+        Job
+            .WithCode(() =>
             {
-                for (int z = 0; z < axisLength; z++)
-                {
-                    Translation spawnPosition = new Translation { Value = new float3(x, numCubes / nextSpawnAmount, z) * spacing };
-                    Entity newCubeEntity = commandBuffer.Instantiate(cubePrefab);
-                    commandBuffer.SetComponent(newCubeEntity, spawnPosition);
-                }
+                Translation spawnPosition = new Translation { Value = newSpawnPosition };
 
+                Entity newCubeEntity = commandBuffer.Instantiate(cubePrefab);
+                commandBuffer.SetComponent(newCubeEntity, spawnPosition);
+
+                PhysicsVelocity upwardsVelocity = new PhysicsVelocity { Linear = upwards * upswing };
+                commandBuffer.SetComponent(newCubeEntity, upwardsVelocity);
             }
-
-        }).Schedule();
+        ).Schedule();
 
         beginSumilationECB.AddJobHandleForProducer(Dependency);
+
+        return cubeQuery.CalculateEntityCountWithoutFiltering();
     }
 }
