@@ -11,7 +11,7 @@ using UnityEngine;
 [AlwaysUpdateSystem]
 public partial class PerformanceMeasurerSystem : SystemBase
 {
-    private const int ROTATING_MAX_AMOUNT_MONO = 27500;
+    private const int PHYSICS_MAX_AMOUNT_MONO = 8000;
 
     private string fileName = "performanceReport";
     private string performanceReportPath;
@@ -72,7 +72,7 @@ public partial class PerformanceMeasurerSystem : SystemBase
 
         tempFPSCalculations += $"\n{fps}, {spawnAmount}";
 
-        if (spawnAmount % 100 != 0) return;
+        if (spawnAmount % 50 != 0) return;
 
         File.AppendAllText(performanceReportPath, tempFPSCalculations);
 
@@ -87,7 +87,7 @@ public partial class PerformanceMeasurerSystem : SystemBase
     private void CheckForEnd(int avgFps)
     {
         int spawnedEntities = cubeQuery.CalculateEntityCountWithoutFiltering();
-        if (avgFps >= 24 && spawnedEntities < ROTATING_MAX_AMOUNT_MONO) return;
+        if (avgFps >= 24 && spawnedEntities < PHYSICS_MAX_AMOUNT_MONO) return;
 
 #if UNITY_EDITOR
         EditorApplication.ExitPlaymode();
