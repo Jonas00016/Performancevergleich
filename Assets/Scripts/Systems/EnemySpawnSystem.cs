@@ -9,15 +9,12 @@ using Unity.Transforms;
 public partial class EnemySpawnSystem : SystemBase
 {
     private const int MAX_ENEMIES = 100000;
-    private const int SPWAN_AMOUNT = 100;
-    private const float BREAKE_TIME = 10f;
+    private const int SPWAN_AMOUNT = 500;
 
     private EntityQuery enemyQuery;
     private BeginSimulationEntityCommandBufferSystem beginSimulationECB;
     private Entity prefab;
     private int enemyCount;
-
-    private float timer = 0f;
 
     protected override void OnCreate()
     {
@@ -33,19 +30,25 @@ public partial class EnemySpawnSystem : SystemBase
             prefab = GetSingleton<EnemyAuthoringComponent>().prefab;
             return;
         }
+    }
+
+    [BurstCompile]
+    public int SpawnEnemies()
+    {
+        if (prefab == Entity.Null)
+        {
+            prefab = GetSingleton<EnemyAuthoringComponent>().prefab;
+            return -1;
+        }
 
         enemyCount = enemyQuery.CalculateEntityCountWithoutFiltering();
 
-        timer += Time.DeltaTime;
-
-        if (enemyCount >= MAX_ENEMIES ||
-            timer < BREAKE_TIME) return;
+        if (enemyCount >= MAX_ENEMIES) return enemyCount;
 
         EntityCommandBuffer commandBuffer = beginSimulationECB.CreateCommandBuffer();
         Entity enemyPrefab = prefab;
         Random rnd = new Random((uint)Stopwatch.GetTimestamp());
         int spawnAmount = SPWAN_AMOUNT;
-        timer = 0f;
 
         Job.WithCode(() =>
         {
@@ -62,7 +65,7 @@ public partial class EnemySpawnSystem : SystemBase
                             0f,
                             rnd.NextFloat(-50f, 50f)
                         );
-                } 
+                }
                 else if (i < spawnAmount / 4 * 2)
                 {
                     position = new float3(
@@ -96,5 +99,7 @@ public partial class EnemySpawnSystem : SystemBase
         }).Schedule();
 
         beginSimulationECB.AddJobHandleForProducer(Dependency);
+
+        return enemyQuery.CalculateEntityCountWithoutFiltering();
     }
 }

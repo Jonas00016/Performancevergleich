@@ -9,12 +9,12 @@ using Unity.Physics;
 
 public partial class ProjectileSpawnSystem : SystemBase
 {
-    private const float MOVEMENTSPEED = 50f;
+    private const float MOVEMENTSPEED = 40f;
 
     private BeginSimulationEntityCommandBufferSystem beginSimulationECB;
     private Entity prefab;
 
-    private float perSecond = 10f;
+    private float perSecond = 50f;
     private float nextTime = 0f;
 
     protected override void OnCreate()
