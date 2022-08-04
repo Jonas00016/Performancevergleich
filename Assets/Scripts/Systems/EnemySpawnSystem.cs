@@ -33,17 +33,17 @@ public partial class EnemySpawnSystem : SystemBase
     }
 
     [BurstCompile]
-    public int SpawnEnemies()
+    public void SpawnEnemies()
     {
         if (prefab == Entity.Null)
         {
             prefab = GetSingleton<EnemyAuthoringComponent>().prefab;
-            return -1;
+            return;
         }
 
         enemyCount = enemyQuery.CalculateEntityCountWithoutFiltering();
 
-        if (enemyCount >= MAX_ENEMIES) return enemyCount;
+        if (enemyCount >= MAX_ENEMIES) return;
 
         EntityCommandBuffer commandBuffer = beginSimulationECB.CreateCommandBuffer();
         Entity enemyPrefab = prefab;
@@ -99,7 +99,5 @@ public partial class EnemySpawnSystem : SystemBase
         }).Schedule();
 
         beginSimulationECB.AddJobHandleForProducer(Dependency);
-
-        return enemyQuery.CalculateEntityCountWithoutFiltering();
     }
 }

@@ -23,10 +23,9 @@ public partial class PerformanceMeasurerSystem : SystemBase
     private int maxFps = int.MinValue;
     private float timer = 0f;
     private float timePassed = 0f;
-    private int spawnedEnemies = 0;
 
     private EntityQuery enemyQuery;
-    private EntityQuery playerQuery;
+    private EntityQuery projectileQuery;
 
     protected override void OnCreate()
     {
@@ -38,7 +37,7 @@ public partial class PerformanceMeasurerSystem : SystemBase
 #endif
 
         enemyQuery = GetEntityQuery(ComponentType.ReadOnly<EnemyTag>());
-        playerQuery = GetEntityQuery(ComponentType.ReadOnly<PlayerTag>());
+        projectileQuery = GetEntityQuery(ComponentType.ReadOnly<ProjectileTag>());
     }
 
     [BurstCompile]
@@ -92,7 +91,9 @@ public partial class PerformanceMeasurerSystem : SystemBase
 
         int avgFps = (fpsMeasured == 0 ? 0 : sumFps / fpsMeasured);
 
-        File.AppendAllText(performanceReportPath, $"\n{minFps}, {avgFps}, {maxFps}, {spawnedEnemies},");
+        int entitieSum = 2 + enemyQuery.CalculateEntityCountWithoutFiltering() + projectileQuery.CalculateEntityCountWithoutFiltering();
+
+        File.AppendAllText(performanceReportPath, $"\n{minFps}, {avgFps}, {maxFps}, {entitieSum},");
 
         CheckForEnd(avgFps);
 
@@ -118,6 +119,6 @@ public partial class PerformanceMeasurerSystem : SystemBase
     private void IncreaseEnemies()
     {
         timer = 0f;
-        spawnedEnemies = World.GetOrCreateSystem<EnemySpawnSystem>().SpawnEnemies();
+        World.GetOrCreateSystem<EnemySpawnSystem>().SpawnEnemies();
     }
 }
